@@ -4,9 +4,15 @@ using Infrastructure.Identity.Contexts;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.OpenApi.Models;
+using Presentation.Common.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +35,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Add - Swagger Gen
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type => type.ToString());
+    options.CustomSchemaIds(type => type.FullName);
+    options.OperationFilter<SwaggerDefaultValuesFilter>();
+    options.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "Mockifyr API - V1" });
+});
 
 // Add - Cors
 builder.Services.AddCors(options =>
@@ -40,6 +52,10 @@ builder.Services.AddCors(options =>
             builder.WithOrigins(_corsOrigins).AllowAnyHeader().WithMethods("GET", "PUT", "POST", "DELETE", "UPDATE", "OPTIONS");
         });
 });
+
+#pragma warning disable CS0618 // Type or member is obsolete
+builder.Services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
+#pragma warning restore CS0618 // Type or member is obsolete
 #endregion
 
 #region Db Contexts
@@ -112,6 +128,25 @@ builder.Services.AddDbContext<IdentityContext>(options =>
 });
 #endregion
 
+#region Api Versioning
+builder.Services.AddApiVersioning(opt =>
+{
+    opt.DefaultApiVersion = new ApiVersion(1, 0);
+    opt.AssumeDefaultVersionWhenUnspecified = true;
+    opt.ReportApiVersions = true;
+    opt.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
+                                                    new QueryStringApiVersionReader("x-api-version"),
+                                                    new HeaderApiVersionReader("x-api-version"),
+                                                    new MediaTypeApiVersionReader("x-api-version"));
+});
+
+builder.Services.AddVersionedApiExplorer(opt =>
+{
+    opt.GroupNameFormat = "'v'VVV";
+    opt.SubstituteApiVersionInUrl = true;
+});
+#endregion
+
 #region Auth
 // Add - Identity
 builder.Services.AddIdentity<User, IdentityRole>()
@@ -142,12 +177,19 @@ builder.Services.AddAuthentication(options =>
 #endregion
 
 var app = builder.Build();
+var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(o =>
+    {
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            o.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Mockifyr - {description.GroupName.ToUpper()}");
+        }
+    });
 }
 
 app.UseHttpsRedirection();
