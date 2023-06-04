@@ -9,7 +9,6 @@
     <Folder Include="Common\Exceptions\" />
     <Folder Include="Common\Mappings\" />
     <Folder Include="Common\Models\" />
-    <Folder Include="Features\Identity\Auth\Commands\" />
     <Folder Include="Features\Identity\Auth\EventHandlers\" />
     <Folder Include="Features\Identity\Auth\Queries\" />
     <Folder Include="Features\Identity\User\Commands\" />
