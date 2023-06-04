@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Features.Identity.Auth.Queries.Login;
+using Domain.Wrappers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers.V1.Identity;
 
@@ -6,8 +8,16 @@ namespace Presentation.Controllers.V1.Identity;
 [ApiVersion("1.0")]
 public class AuthController : BaseController
 {
-    public IActionResult Index()
+    [HttpPost]
+    public async Task<ActionResult<ResponseContainer<LoginQueryResponse>>> LoginAsync(LoginQuery query)
     {
-        return View();
+        ResponseContainer<LoginQueryResponse> response = await Mediator.Send(query);
+
+        if (!response.IsSucceed)
+        {
+            return Unauthorized(response.ErrorMessage);
+        }
+
+        return Ok(response);
     }
 }

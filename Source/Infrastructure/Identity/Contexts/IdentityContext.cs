@@ -12,12 +12,4 @@ public class IdentityContext : IdentityDbContext<User>, IIdentityContext
     }
 
     public DbSet<User> Users { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-
-        // Identity tablolarının yapılandırması
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdentityContext).Assembly);
-    }
 }
