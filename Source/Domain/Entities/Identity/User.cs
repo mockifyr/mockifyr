@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Infrastructure.Identity;
+namespace Domain.Entities.Identity;
 
-public class ApplicationUser : IdentityUser
+public class User : IdentityUser
 {
     public string FullName { get; set; }
 }

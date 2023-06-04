@@ -10,16 +10,25 @@
     <Folder Include="Common\Mappings\" />
     <Folder Include="Common\Models\" />
     <Folder Include="Features\Identity\Auth\EventHandlers\" />
-    <Folder Include="Features\Identity\Auth\Queries\" />
-    <Folder Include="Features\Identity\User\Commands\" />
-    <Folder Include="Features\Identity\User\EventHandlers\" />
-    <Folder Include="Features\Identity\User\Queries\" />
+    <Folder Include="Features\Identity\Users\Commands\" />
+    <Folder Include="Features\Identity\Users\EventHandlers\" />
+    <Folder Include="Features\Identity\Users\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.2" />
     <PackageReference Include="MediatR" Version="12.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.54.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.30.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.30.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
 </Project>

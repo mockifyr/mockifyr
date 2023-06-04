@@ -1,4 +1,6 @@
-﻿using Infrastructure.Identity;
+﻿using Domain.Entities.Identity;
+using Domain.Wrappers;
+using Infrastructure.Identity.Contexts;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -11,14 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 #region Variables
 ConfigurationManager configuration = builder.Configuration;
 
+JwtOptions _jwtOptions = configuration.GetSection("JwtOptions").Get<JwtOptions>();
 string _corsOrigins = configuration["AllowedHosts"];
-string secretStr = configuration["JwtOptions:Secret"];
-byte[] secret = Encoding.UTF8.GetBytes(secretStr);
+byte[] secret = Encoding.UTF8.GetBytes(_jwtOptions.Secret);
 #endregion
 
 // Add services to the container.
 
 #region General Definitions
+builder.Services.AddSingleton(_jwtOptions);
+
 builder.Services.AddControllers();
 // Add - Endpoints Api Explorer
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -110,7 +114,7 @@ builder.Services.AddDbContext<IdentityContext>(options =>
 
 #region Auth
 // Add - Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<IdentityContext>()
             .AddDefaultTokenProviders();
 
@@ -122,7 +126,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.Audience = configuration["JwtOptions:Audience"];
+    options.Audience = _jwtOptions.Audience;
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters()
